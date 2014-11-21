@@ -21,7 +21,7 @@ def raw_data():
 
 
 def get_temp():
-    """Retrieves raw data from temperature sensor and parses out temperature"""
+    """Retrieves current fahrenheit temperature value"""
 
     data = raw_data()
     while data[0].strip()[-3:] != 'YES':
@@ -31,17 +31,16 @@ def get_temp():
     temp_val = data[1].find('t=')
     if temp_val != -1:
         temp_string = data[1].strip()[temp_val + 2:]
-        temp_celsius = float(temp_string) / 1000.0
-        temp_fahrenheit = 32.0 + (temp_celsius * 1.8)
-        return temp_fahrenheit, temp_celsius
+        temp_fahrenheit = 32.0 + ((float(temp_string) / 1000.0) * 1.8)
+        return temp_fahrenheit
 
 
 def send_temp():
     """Send the temperature to the gateway"""
 
-    temp_f_c = get_temp()
-
+    temperature = get_temp()
+    # TODO: Send temperature to gateway
 
 while True:
-    # Wait for request...
-    send_temp() # Respond to request
+    # TODO: Wait for request...
+    send_temp()     # Respond to request
