@@ -1,0 +1,4 @@
+zeroconf
+urllib3
+uuid
+Flask

@@ -2,3 +2,4 @@ To setup Avahi on Raspbian:
 - apt-get install avahi-daemon avahi-discover avahi-utils
 - Put the tempnet.service file in /etc/avahi/services/
 - Ensure avahi-daemon starts at boot
+- Install requirements with pip

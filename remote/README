@@ -1,0 +1,6 @@
+This contains files for the remote node.
+
+On Raspbian:
+- Install python-pip and requirements from requirements.txt
+- Install the init script so tempnet_regd.py starts at boot
+  (alternatively just run tempnet_regd.py as root)
