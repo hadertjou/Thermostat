@@ -10,8 +10,8 @@ os.system('modprobe w1-therm')
 
 tempsensor_sn = 'Enter Temperature Sensor Serial Number'
 
-sensor = 'sys/bus/w1/devices/' + tempsensor_sn + 'w1_slave'
-
+#sensor = 'sys/bus/w1/devices/' + tempsensor_sn + 'w1_slave'
+sensor = '/sys/bus/w1/devices/28-000005abe684/w1_slave'
 
 def raw_data():
     """Retrieves the raw data from the temperature sensor on the Raspberry Pi"""
