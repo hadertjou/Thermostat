@@ -2,16 +2,20 @@
 
 import os
 import time
+import RPi.GPIO as GPIO
 from flask import Flask
 app = Flask(__name__)
 
 os.system('modprobe w1-gpio')
 os.system('modprobe w1-therm')
 
-tempsensor_sn = 'Enter Temperature Sensor Serial Number'
+tempsensor_sn = '28-000005abe684'   # Varies depending on sensor
+sensor = 'sys/bus/w1/devices/' + tempsensor_sn + '/w1_slave'
 
-#sensor = 'sys/bus/w1/devices/' + tempsensor_sn + 'w1_slave'
-sensor = '/sys/bus/w1/devices/28-000005abe684/w1_slave'
+# GPIO pin output is 3.3V
+GPIO.setmode(GPIO.BOARD)
+chan_list = [19, 21, 23]
+GPIO.setup(chan_list, GPIO.OUT) # Sets pins 19(r), 21(g), and 23(b) as output pins
 
 def raw_data():
     """Retrieves the raw data from the temperature sensor on the Raspberry Pi"""
@@ -36,6 +40,9 @@ def get_temp():
         temp_fahrenheit = 32.0 + ((float(temp_string) / 1000.0) * 1.8)
         return temp_fahrenheit
 
+def set_led(r, g, b):
+    """Set the color of the LED"""
+    GPIO.output(chan_list, (r, g, b))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=False)
