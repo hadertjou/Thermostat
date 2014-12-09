@@ -12,10 +12,11 @@ os.system('modprobe w1-therm')
 tempsensor_sn = '28-000005abe684'   # Varies depending on sensor
 sensor = 'sys/bus/w1/devices/' + tempsensor_sn + '/w1_slave'
 
-# GPIO pin output is 3.3V
+# Sets pins 19(r), 21(g), and 23(b) as output pins
 GPIO.setmode(GPIO.BOARD)
-chan_list = [19, 21, 23]
-GPIO.setup(chan_list, GPIO.OUT) # Sets pins 19(r), 21(g), and 23(b) as output pins
+GPIO.setup(19, GPIO.OUT)
+GPIO.setup(21, GPIO.OUT)
+GPIO.setup(23, GPIO.OUT)
 
 def raw_data():
     """Retrieves the raw data from the temperature sensor on the Raspberry Pi"""
@@ -42,8 +43,27 @@ def get_temp():
 
 def set_led(r, g, b):
     """Set the color of the LED"""
-    GPIO.output(chan_list, (r, g, b))
-
+    GPIO.output(19, r)
+    GPIO.output(21, g)
+    GPIO.output(23, b)
+    
+def set_color(color):
+    """Receives name of color and sets the LED"""
+    if color == 'red':
+        set_led(0, 1, 1)
+    elif color == 'green':
+        set_led(1, 0, 1)
+    elif color == 'blue':
+        set_led(1, 1, 0)
+    elif color == 'yellow':
+        set_led(0, 0, 1)
+    elif color == 'magenta':
+        set_led(0, 1, 0)
+    elif color == 'cyan':
+        set_led(1, 0, 0)
+    elif color == 'white':
+        set_led(0, 0, 0)
+    
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=False)
 
