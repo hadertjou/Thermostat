@@ -158,15 +158,7 @@ $conn->close();
                           <input name = "set_temp" id = "set_temp" class="form-control" placeholder="" type="text">
                         </div>
                       </div>
-                      <!--
-                      <div class="form-group">
-                        <label class="control-label col-md-2">Dropdown</label>
-                        <div class="col-md-7">
-                          <select class="form-control"><option value="Category 1">Option 1</option><option value="Category 2">Option 2</option><option value="Category 3">Option 3</option><option value="Category 4">Option 4</option></select>
-                        </div>
-                      </div>
-                      -->
-                    
+                     
                       <div class="form-group">
                         <label class="control-label col-md-2">Mode</label>
                         <div class="col-md-7">
@@ -182,8 +174,6 @@ $conn->close();
                         </div>
                       </div>
 
-                      
-                      
                       
                       <div class="form-group">
                         
@@ -221,26 +211,10 @@ $conn->close();
               </div>
             </div>
           </div>
-          <!-- End Bar Graph -->
+          <!-- End System Stats -->
         </div>
         
-     
       </div>
     </div>
-
-
-
-    <button onclick="myFunction()">Reload page</button>
-    <button onclick="reloadPage()">Reload page 2</button>
-    <script>
-      function myFunction() {
-          location.reload();
-      }
-    </script>
-
-   
   </body>
-
-  
-
 </html>
