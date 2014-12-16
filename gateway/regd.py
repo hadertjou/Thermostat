@@ -3,6 +3,7 @@
 from flask import Flask, request
 import MySQLdb
 import time
+import RPi.GPIO as GPIO
 
 """
 A simple script to test the registration process.
@@ -18,6 +19,12 @@ remote1 = 0;
 remote2 = 0;
 remote3 = 0;
 nodes = {'remote1': 0, 'remote2': 0, 'remote3': 0}
+
+
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(19, GPIO.OUT)
+GPIO.setup(21, GPIO.OUT)
+GPIO.setup(23, GPIO.OUT)
 
 
 # Create a connection object and create a cursor
@@ -48,21 +55,14 @@ def reg_client():
 
 
 
-
-
-
 @app.route('/temp', methods = ['GET'])
 def calculate_avg():
-    # temp1,temp2,temp3
-    r1 = request.get("http://" + str(nodes[0]) + "/temp")
-    r2 = request.get("http://" + str(nodes[1]) + "/temp")
-    r3 = request.get("http://" + str(nodes[2]) + "/temp")
-    temp1 = int(r1.text)
-    temp2 = int(r2.text)
-    temp3 = int(r3.text)
+    temp = 0;
+    for x in range (0, len(nodes)):
+        r = request.get("http://" + str(nodes[x]) + "/temp");
+        temp += int(r.text);
 
-
-    avg = temp1 + temp2 + temp3;
+    avg = temp;
 
     Cursor.execute("""
     UPDATE projectDB
@@ -76,23 +76,43 @@ def calculate_avg():
 
 #From Database
 @app.route('/status', methods = ['GET'])
-def state():
+def setMode():
 
     Results = Cursor.fetchall();
     #(avgtemp, settemp, mode, status)
     if (Results(2) == 0):
+        set_color("red");
         return "heating"
     if (Results(2) == 1):
+        set_color("blue");
         return "cooling"
     if (Results(2) == 2):
-        return "idle"
+
+        
+        if (desiredtemp > calculate_avg()):
+            #turn LEDS Red
+            set_color("red");
+            return 0;
+        if (desiredtemp < calculate_avg()):
+            #turn LEDs Blue
+            set_color("blue");
+            return 1;
+
+        if (desiredtemp == calculate_avg()):
+            #idle/off
+            set_color("white");
+
+        return "default"
+    if (Results(2) == 3):
+        set_color("white");
+        return "off"
 
     return "error"
 
 #From remote node
-@app.route('/settemp', methods = ['GET'])
-def get_temp():
-    return desiredtemp
+#@app.route('/settemp', methods = ['GET'])
+#def get_temp():
+#    return desiredtemp
 
 #from Database
 @app.route('/settemp', methods = ['POST'])
@@ -100,41 +120,59 @@ def settemp():
     #r = requests.
     Results = Cursor.fetchall()
     desiredtemp = Results(1);
-    if (desiredtemp < calculate_avg()):
-        #turn LEDs Blue
-        set_color("blue");
 
     if (desiredtemp > calculate_avg()):
         #turn LEDS Red
         set_color("red");
+        return 0;
+    if (desiredtemp < calculate_avg()):
+        #turn LEDs Blue
+        set_color("blue");
+        return 1;
+
+    if (desiredtemp == calculate_avg()):
+        #idle/off
+        set_color("white");
+
+
 
 
 
 #from remote node
-@app.route('/temp/<UUID>', methods = ['GET'])
+@app.route('/temp/<uuid>', methods = ['GET'])
 def nodetemp(uuid):
 
     r = request.get("http://" + str(nodes[uuid]) + "/temp")
     temp = int(r.text)
     return temp
 
-#To Database
-@app.route('/state', methods = ['GET'])
-def state():
-
-    return state;
 
 
-
-#From Database
+# Database
 @app.route('/state', methods = ['POST'])
-def setstate():
-    #r = request.post("http://<gateway>/state", data=payload)
+def currentStatus():
+    #Always Heating, always cooling, idle
+    if (settemp() == 0):
+        Cursor.execute("""
+        UPDATE projectDB
+        SET status=%s
+        WHERE db_index=%s
+        """, (0 ,0))
 
+    if (settemp() == 1):
+        Cursor.execute("""
+        UPDATE projectDB
+        SET status=%s
+        WHERE db_index=%s
+        """, (1 ,0))
 
+    else:
+        Cursor.execute("""
+        UPDATE projectDB
+        SET status=%s
+        WHERE db_index=%s
+        """, (2 ,0))
 
-def updateDB():
-    print("updated")
 
 
 
@@ -145,14 +183,41 @@ while var == 1 :  # This constructs an infinite loop
     if (Results(1) != tempResults(1)):
         settemp();
 
+    if (Results(2) != tempResults(2)):
+        setMode();
+
     time.sleep(5);
     tempResults = Results;
 
-print "Good bye!"
 
 
 
 Con.close()
+
+
+
+def set_led(r, g, b):
+    """Set the color of the LED"""
+    GPIO.output(19, r)
+    GPIO.output(21, g)
+    GPIO.output(23, b)
+
+def set_color(color):
+    """Receives name of color and sets the LED"""
+    if color == 'red':
+        set_led(0, 1, 1)
+    elif color == 'green':
+        set_led(1, 0, 1)
+    elif color == 'blue':
+        set_led(1, 1, 0)
+    elif color == 'yellow':
+        set_led(0, 0, 1)
+    elif color == 'magenta':
+        set_led(0, 1, 0)
+    elif color == 'cyan':
+        set_led(1, 0, 0)
+    elif color == 'white':
+        set_led(0, 0, 0)
 
 
 
