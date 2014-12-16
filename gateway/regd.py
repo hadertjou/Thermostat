@@ -6,7 +6,7 @@ from flask import Flask, request
 import MySQLdb
 import time
 import RPi.GPIO as GPIO
-
+import requests
 
 """
 A simple script to test the registration process.
@@ -16,19 +16,17 @@ Must be run as root for now.
 app = Flask(__name__)
 
 
-desiredtemp = 0;
-state = 0;
-remote1 = 0;
-remote2 = 0;
-remote3 = 0;
-nodes = {'remote1': 0, 'remote2': 0, 'remote3': 0}
+desiredtemp = 0
+state = 0
+
+#nodes = {'remote1': 0, 'remote2': 0, 'remote3': 0}
+nodes = {}
 
 
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(19, GPIO.OUT)
 GPIO.setup(21, GPIO.OUT)
 GPIO.setup(23, GPIO.OUT)
-
 
 
 Con = MySQLdb.Connect(host="69.65.10.232", port=3306, user="timuster_ece4564", passwd="netApps4564", db="timuster_ece4564")
@@ -47,28 +45,50 @@ def reg_client():
     retstr = "Registered {0}".format(uuid)
     #while (iter(nodes)):
     #    ip = request.remote_addr;
-    for x in range (0, len(nodes)):
-        ip = request.remote_addr;
-        nodes[x] = ip;
+    ip = request.remote_addr;
+    if uuid not in nodes.keys():
+        nodes[uuid] = ip;
     print(retstr)
     return retstr
 
 
 
 @app.route('/temp', methods = ['GET'])
+def get_avg():
+    return str(calculate_avg())
+
 def calculate_avg():
     temp = 0;
-    for x in range (0, len(nodes)):
-        r = request.get("http://" + str(nodes[x]) + "/temp");
-        temp += int(r.text);
 
-    avg = temp;
+    if len(nodes) == 0:
+        mynodes = {'B827EB5D4F2C':'192.168.0.4', 'B827EB82DA58': '192.168.0.3', 'B827EB9D0DB3':'192.168.0.1'}
+    else:
+        mynodes = nodes
+	
+    successes = 0
+    for x in mynodes:
+        try:
+	    r = requests.get("http://" + str(mynodes[x]) + "/temp");
+	    temp += int(float(r.text));
+            successes += 1
+        except:
+            pass
 
-    Cursor.execute("""
-    UPDATE projectDB
-    SET avg_temp=%s
-    WHERE db_index=%s
-    """, (avg,0))
+
+    if successes != 0:
+        avg = temp / successes;
+    else:
+        avg = 0;
+
+    try:
+
+        Cursor.execute("""
+	UPDATE projectDB
+	SET avg_temp=%s
+	WHERE db_index=%s
+	""", (avg,0))
+    except:
+        pass
 
     return avg;
 
@@ -77,33 +97,38 @@ def calculate_avg():
 #From Database
 @app.route('/status', methods = ['GET'])
 def setMode():
-
+    Con = MySQLdb.Connect(host="69.65.10.232", port=3306, user="timuster_ece4564", passwd="netApps4564", db="timuster_ece4564")
+    Cursor = Con.cursor()
+    sql = "SELECT avg_temp, current_temp, mode, status FROM projectDB"
+    Cursor.execute(sql)
+    
     Results = Cursor.fetchall();
+    desiredtemp = int(Results[0][1])
     #(avgtemp, settemp, mode, status)
-    if (int(Results(2)[:-1]) == 0):
+    if (int(Results[0][2]) == 0):
         set_color("red");
         return "heating"
-    if (int(Results(2)[:-1]) == 1):
+    if (int(Results[0][2]) == 1):
         set_color("blue");
         return "cooling"
-    if (int(Results(2)[:-1]) == 2):
+    if (int(Results[0][2]) == 2):
 
 
         if (desiredtemp > calculate_avg()):
             #turn LEDS Red
             set_color("red");
-            return 0;
+            return str(0);
         if (desiredtemp < calculate_avg()):
             #turn LEDs Blue
             set_color("blue");
-            return 1;
+            return str(1);
 
         if (desiredtemp == calculate_avg()):
             #idle/off
             set_color("white");
 
         return "default"
-    if (int(Results(2)[:-1]) == 3):
+    if (int(Results[0][2]) == 3):
         set_color("white");
         return "off"
 
@@ -119,28 +144,60 @@ def setMode():
 def settemp():
     r = request.form['temp']
     newtemp = int(r.text)
+    Con = MySQLdb.Connect(host="69.65.10.232", port=3306, user="timuster_ece4564", passwd="netApps4564", db="timuster_ece4564")
+    Cursor = Con.cursor()
+    sql = "SELECT avg_temp, current_temp, mode, status FROM projectDB"
+    Cursor.execute(sql)
     Results = Cursor.fetchall()
-    desiredtemp = int(Results(1)[:-1])
-
-    if (desiredtemp > calculate_avg()):
-        #turn LEDS Red
-        set_color("red");
-        return 0;
-    if (desiredtemp < calculate_avg()):
-        #turn LEDs Blue
-        set_color("blue");
-        return 1;
-
-    if (desiredtemp == calculate_avg()):
-        #idle/off
-        set_color("white");
-
+    desiredtemp = int(Results[0][1])
+    
     Cursor.execute("""
     UPDATE projectDB
     SET avg_temp=%s
     WHERE db_index=%s
     """, (newtemp ,0))
 
+    if (desiredtemp > calculate_avg()):
+        #turn LEDS Red
+        set_color("red");
+        return str(0);
+    if (desiredtemp < calculate_avg()):
+        #turn LEDs Blue
+        set_color("blue");
+        return str(1);
+
+    if (desiredtemp == calculate_avg()):
+        #idle/off
+        set_color("white");
+
+
+def setdbtemp(newtemp):
+    Con = MySQLdb.Connect(host="69.65.10.232", port=3306, user="timuster_ece4564", passwd="netApps4564", db="timuster_ece4564")
+    Cursor = Con.cursor()
+    sql = "SELECT avg_temp, current_temp, mode, status FROM projectDB"
+    Cursor.execute(sql)
+    Results = Cursor.fetchall()
+    desiredtemp = int(Results[0][1])
+    
+    Cursor.execute("""
+    UPDATE projectDB
+    SET avg_temp=%s
+    WHERE db_index=%s
+    """, (newtemp ,0))
+
+    if (desiredtemp > calculate_avg()):
+        #turn LEDS Red
+        set_color("red");
+        return str(0);
+    if (desiredtemp < calculate_avg()):
+        #turn LEDs Blue
+        set_color("blue");
+        return str(1);
+
+    if (desiredtemp == calculate_avg()):
+        #idle/off
+        set_color("white");
+        return str(2)
 
 
 
@@ -148,8 +205,8 @@ def settemp():
 @app.route('/temp/<uuid>', methods = ['GET'])
 def nodetemp(uuid):
 
-    r = request.get("http://" + str(nodes[uuid]) + "/temp")
-    temp = int(r.text)
+    r = requests.get("http://" + str(nodes[uuid]) + "/temp")
+    temp = r.text
     return temp
 
 
@@ -158,7 +215,7 @@ def nodetemp(uuid):
 @app.route('/state', methods = ['POST'])
 def currentStatus():
     #Always Heating, always cooling, idle
-    if (settemp() == 0):
+    if (setdbtemp() == "0"):
         Cursor.execute("""
         UPDATE projectDB
         SET status=%s
@@ -166,7 +223,7 @@ def currentStatus():
         """, (0 ,0))
         return "Heating"
 
-    if (settemp() == 1):
+    elif (setdbtemp() == "1"):
         Cursor.execute("""
         UPDATE projectDB
         SET status=%s
@@ -209,7 +266,7 @@ def set_color(color):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80, debug=False)
+    app.run(host='0.0.0.0', port=80, debug=True)
 
 
 
