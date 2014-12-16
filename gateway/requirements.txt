@@ -2,3 +2,4 @@ Flask
 urllib3
 MySQL-python
 requests
+RPi.GPIO
