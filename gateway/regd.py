@@ -16,11 +16,9 @@ Must be run as root for now.
 app = Flask(__name__)
 
 
-desiredtemp = 0;
-state = 0;
-remote1 = 0;
-remote2 = 0;
-remote3 = 0;
+desiredtemp = 0
+state = 0
+
 nodes = {'remote1': 0, 'remote2': 0, 'remote3': 0}
 
 
@@ -28,7 +26,6 @@ GPIO.setmode(GPIO.BOARD)
 GPIO.setup(19, GPIO.OUT)
 GPIO.setup(21, GPIO.OUT)
 GPIO.setup(23, GPIO.OUT)
-
 
 
 Con = MySQLdb.Connect(host="69.65.10.232", port=3306, user="timuster_ece4564", passwd="netApps4564", db="timuster_ece4564")
@@ -62,7 +59,7 @@ def calculate_avg():
         r = request.get("http://" + str(nodes[x]) + "/temp");
         temp += int(r.text);
 
-    avg = temp;
+    avg = temp / len(nodes);
 
     Cursor.execute("""
     UPDATE projectDB
@@ -80,13 +77,13 @@ def setMode():
 
     Results = Cursor.fetchall();
     #(avgtemp, settemp, mode, status)
-    if (int(Results(2)[:-1]) == 0):
+    if (int(Results[0][2]) == 0):
         set_color("red");
         return "heating"
-    if (int(Results(2)[:-1]) == 1):
+    if (int(Results[0][2]) == 1):
         set_color("blue");
         return "cooling"
-    if (int(Results(2)[:-1]) == 2):
+    if (int(Results[0][2]) == 2):
 
 
         if (desiredtemp > calculate_avg()):
@@ -103,7 +100,7 @@ def setMode():
             set_color("white");
 
         return "default"
-    if (int(Results(2)[:-1]) == 3):
+    if (int(Results[0][2]) == 3):
         set_color("white");
         return "off"
 
@@ -120,7 +117,7 @@ def settemp():
     r = request.form['temp']
     newtemp = int(r.text)
     Results = Cursor.fetchall()
-    desiredtemp = int(Results(1)[:-1])
+    desiredtemp = int(Results[0][1])
 
     if (desiredtemp > calculate_avg()):
         #turn LEDS Red
@@ -142,6 +139,28 @@ def settemp():
     """, (newtemp ,0))
 
 
+def setdbtemp(newtemp):
+    Results = Cursor.fetchall()
+    desiredtemp = int(Results[0][1])
+
+    if (desiredtemp > calculate_avg()):
+        #turn LEDS Red
+        set_color("red");
+        return 0;
+    if (desiredtemp < calculate_avg()):
+        #turn LEDs Blue
+        set_color("blue");
+        return 1;
+
+    if (desiredtemp == calculate_avg()):
+        #idle/off
+        set_color("white");
+
+    Cursor.execute("""
+    UPDATE projectDB
+    SET avg_temp=%s
+    WHERE db_index=%s
+    """, (newtemp ,0))
 
 
 #from remote node

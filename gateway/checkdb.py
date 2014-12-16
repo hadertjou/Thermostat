@@ -20,20 +20,22 @@ Cursor.execute(sql)
 curMode = 0
 curTemp = 0
 
-var = 1
-while var == 1 :  # This constructs an infinite loop
+
+while True :  # This constructs an infinite loop
+
+    ambientTemp = int(calculate_avg())
 
     Results = Cursor.fetchall();
-    if (int(Results(1)[:-1]) != curTemp):
-        settemp();
+    if (int(Results[0][1]) != curTemp):
+        setdbtemp(curTemp);
 
-    if (int(Results(2)[:-1]) != curMode):
+    if (int(Results[0][2]) != curMode):
         setMode();
 
     time.sleep(5);
     #tempResults = Results;
-    curMode = int(Results(1))
-    curTemp = int(Results(2))
+    curMode = int(Results[0][1])
+    curTemp = int(Results[0][2])
 
 
 Con.close()
