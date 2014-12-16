@@ -2,3 +2,4 @@ zeroconf
 urllib3
 uuid
 Flask
+RPi.GPIO

@@ -52,8 +52,8 @@ class MyListener(object):
     def removeService(self, zeroconf, type, name):
         print("Service %s removed" % (name))
 
-    def addService(self, zeroconf, type, name):
-        info = zeroconf.getServiceInfo(type, name)
+    def add_service(self, zeroconf, type, name):
+        info = zeroconf.get_service_info(type, name)
         addr = socket.inet_ntoa(info.address)
         server = info.server
         print("Service %s added, service info: %s" % (name, info))
