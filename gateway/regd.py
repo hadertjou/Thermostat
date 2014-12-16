@@ -90,20 +90,28 @@ def state():
     return "error"
 
 #From remote node
-@app.route('/settemp', method = ['GET'])
+@app.route('/settemp', methods = ['GET'])
 def get_temp():
     return desiredtemp
 
 #from Database
-@app.route('/settemp', method = ['POST'])
+@app.route('/settemp', methods = ['POST'])
 def settemp():
     #r = requests.
     Results = Cursor.fetchall()
     desiredtemp = Results(1);
-    return desiredtemp
+    if (desiredtemp < calculate_avg()):
+        #turn LEDs Blue
+        set_color("blue");
+
+    if (desiredtemp > calculate_avg()):
+        #turn LEDS Red
+        set_color("red");
+
+
 
 #from remote node
-@app.route('/temp/<UUID>', method = ['GET'])
+@app.route('/temp/<UUID>', methods = ['GET'])
 def nodetemp(uuid):
 
     r = request.get("http://" + str(nodes[uuid]) + "/temp")
@@ -111,7 +119,7 @@ def nodetemp(uuid):
     return temp
 
 #To Database
-@app.route('/state', method = ['GET'])
+@app.route('/state', methods = ['GET'])
 def state():
 
     return state;
@@ -119,7 +127,7 @@ def state():
 
 
 #From Database
-@app.route('/state', method = ['POST'])
+@app.route('/state', methods = ['POST'])
 def setstate():
     #r = request.post("http://<gateway>/state", data=payload)
 
@@ -132,19 +140,19 @@ def updateDB():
 
 var = 1
 while var == 1 :  # This constructs an infinite loop
+
     Results = Cursor.fetchall();
+    if (Results(1) != tempResults(1)):
+        settemp();
+
     time.sleep(5);
+    tempResults = Results;
 
 print "Good bye!"
 
 
 
-
-
-
 Con.close()
-
-
 
 
 
