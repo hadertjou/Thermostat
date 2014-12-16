@@ -10,7 +10,7 @@ os.system('modprobe w1-gpio')
 os.system('modprobe w1-therm')
 
 tempsensor_sn = '28-000005abe684'   # Varies depending on sensor
-sensor = 'sys/bus/w1/devices/' + tempsensor_sn + '/w1_slave'
+sensor = '/sys/bus/w1/devices/' + tempsensor_sn + '/w1_slave'
 
 # Sets pins 19(r), 21(g), and 23(b) as output pins
 GPIO.setmode(GPIO.BOARD)
