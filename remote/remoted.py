@@ -14,6 +14,7 @@ sensor = '/sys/bus/w1/devices/' + tempsensor_sn + '/w1_slave'
 
 # Sets pins 19(r), 21(g), and 23(b) as output pins
 GPIO.setmode(GPIO.BOARD)
+GPIO.setwarnings(False)
 GPIO.setup(19, GPIO.OUT)
 GPIO.setup(21, GPIO.OUT)
 GPIO.setup(23, GPIO.OUT)
@@ -39,7 +40,9 @@ def get_temp():
     if temp_val != -1:
         temp_string = data[1].strip()[temp_val + 2:]
         temp_fahrenheit = 32.0 + ((float(temp_string) / 1000.0) * 1.8)
-        return temp_fahrenheit
+        return str(temp_fahrenheit)
+    else:
+        return "ERROR"
 
 def set_led(r, g, b):
     """Set the color of the LED"""
@@ -65,5 +68,5 @@ def set_color(color):
         set_led(0, 0, 0)
     
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80, debug=False)
+    app.run(host='0.0.0.0', port=80, debug=True)
 
