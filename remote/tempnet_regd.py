@@ -63,7 +63,7 @@ gw_list = []        # List of gateways we registered with. Possibly useful in th
 
 class MyListener(object):
 
-    def removeService(self, zeroconf, type, name):
+    def remove_service(self, zeroconf, type, name):
         print("Service %s removed" % (name))
 
     def add_service(self, zeroconf, type, name):
