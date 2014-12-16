@@ -1,0 +1,23 @@
+The following still need to be done as per our spec:
+
+### Remote
+- Commit init script to repo from pi 1
+- Deploy remote on Pis 3 and 4
+
+### Gateway/web interface
+- Test everything
+- Users must be able to optionally add a text label to UUIDs to identify the location for their use
+  - This implies there's a list of 
+- Web UI was supposed to be done in Flask. Port this if possible and move to raspberry pi
+- Add init script, commit to github
+
+### Hardware
+- Build physical hardware for Pis 3 and 4 (if we haven't yet)
+
+### Avahi
+- Should be complete
+
+### Presentation
+- Get poster from 3rd floor
+- Make demo video
+- Setup mhazinsk's laptop as a router if internet is required

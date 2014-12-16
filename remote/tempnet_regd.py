@@ -16,14 +16,26 @@ import urllib
 import urllib2
 from uuid import getnode
 
+# A hack to let us import led.py
+import sys
+sys.path.insert(0, '/srv/common')
+from led import *
+
 # Registers by POSTing to the gateway with id=mac_addr
+# LED codes:
+# - white: attempting to register with gateway
+# - yellow: registation was successful
 def register(addr, uuid):
     response = ""
 
     print("Registering with %s as uuid %s" % (addr, uuid))
     expected_response = "Registered {0}".format(uuid)
+    
+    setup_led()
+
 
     while response != expected_response:
+        set_color('white')
         try:
             url = 'http://{0}/register'.format(addr)
             params = urllib.urlencode({
@@ -34,6 +46,8 @@ def register(addr, uuid):
         except:
             print("Could not connect to gateway. Trying again in 3 seconds.")
         time.sleep(3)
+
+    set_color('yellow')
 
     # TODO try again if response is not 200
 
@@ -49,7 +63,7 @@ gw_list = []        # List of gateways we registered with. Possibly useful in th
 
 class MyListener(object):
 
-    def removeService(self, zeroconf, type, name):
+    def remove_service(self, zeroconf, type, name):
         print("Service %s removed" % (name))
 
     def add_service(self, zeroconf, type, name):
@@ -73,4 +87,3 @@ while True:
 
 print("Finished service discovery.")
 print(gw_list)
-
