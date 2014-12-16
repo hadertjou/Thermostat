@@ -15,6 +15,7 @@ import time
 import urllib
 import urllib2
 from uuid import getnode
+import RPi.GPIO as GPIO
 
 # Registers by POSTing to the gateway with id=mac_addr
 def register(addr, uuid):
@@ -23,7 +24,16 @@ def register(addr, uuid):
     print("Registering with %s as uuid %s" % (addr, uuid))
     expected_response = "Registered {0}".format(uuid)
 
+    # Hacky stuff for LED
+    # Sets pins 19(r), 21(g), and 23(b) as output pins
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(19, GPIO.OUT)
+    GPIO.setup(21, GPIO.OUT)
+    GPIO.setup(23, GPIO.OUT)
+
+
     while response != expected_response:
+        set_color('white')
         try:
             url = 'http://{0}/register'.format(addr)
             params = urllib.urlencode({
@@ -35,6 +45,8 @@ def register(addr, uuid):
             print("Could not connect to gateway. Trying again in 3 seconds.")
         time.sleep(3)
 
+    set_color('yellow')
+
     # TODO try again if response is not 200
 
 # Gets a UUID of the raspberry pi. 
@@ -42,6 +54,32 @@ def register(addr, uuid):
 def getUuid():
     hexmac = hex(getnode()).strip('0x').strip('L').upper()
     return hexmac
+
+def set_led(r, g, b):
+    """Set the color of the LED"""
+    GPIO.output(19, r)
+    GPIO.output(21, g)
+    GPIO.output(23, b)
+    
+def set_color(color):
+    """Receives name of color and sets the LED"""
+    if color == 'red':
+        set_led(0, 1, 1)
+    elif color == 'green':
+        set_led(1, 0, 1)
+    elif color == 'blue':
+        set_led(1, 1, 0)
+    elif color == 'yellow':
+        set_led(0, 0, 1)
+    elif color == 'magenta':
+        set_led(0, 1, 0)
+    elif color == 'cyan':
+        set_led(1, 0, 0)
+    elif color == 'white':
+        set_led(0, 0, 0)
+
+
+
 
 # Parts of this are taken from https://pypi.python.org/pypi/zeroconf
 
@@ -73,4 +111,3 @@ while True:
 
 print("Finished service discovery.")
 print(gw_list)
-
