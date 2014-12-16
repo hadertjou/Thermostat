@@ -1,9 +1,12 @@
 #!/usr/bin/env python2
 
+#192.168.0.3 /16 subnet
+
 from flask import Flask, request
 import MySQLdb
 import time
 import RPi.GPIO as GPIO
+
 
 """
 A simple script to test the registration process.
@@ -27,16 +30,13 @@ GPIO.setup(21, GPIO.OUT)
 GPIO.setup(23, GPIO.OUT)
 
 
-# Create a connection object and create a cursor
-Con = MySQLdb.Connect(host="127.0.0.1", port=3306, user="dac_user", passwd="myPassword", db="tst")
+
+Con = MySQLdb.Connect(host="69.65.10.232", port=3306, user="timuster_ece4564", passwd="netApps4564", db="timuster_ece4564")
 Cursor = Con.cursor()
 
 # Make SQL string and execute it
-sql = "SELECT * FROM Users"
+sql = "SELECT avg_temp, current_temp, mode, status FROM projectDB"
 Cursor.execute(sql)
-
-# Fetch all results from the cursor into a sequence and close the connection
-
 
 
 
@@ -80,15 +80,15 @@ def setMode():
 
     Results = Cursor.fetchall();
     #(avgtemp, settemp, mode, status)
-    if (Results(2) == 0):
+    if (int(Results(2)[:-1]) == 0):
         set_color("red");
         return "heating"
-    if (Results(2) == 1):
+    if (int(Results(2)[:-1]) == 1):
         set_color("blue");
         return "cooling"
-    if (Results(2) == 2):
+    if (int(Results(2)[:-1]) == 2):
 
-        
+
         if (desiredtemp > calculate_avg()):
             #turn LEDS Red
             set_color("red");
@@ -103,7 +103,7 @@ def setMode():
             set_color("white");
 
         return "default"
-    if (Results(2) == 3):
+    if (int(Results(2)[:-1]) == 3):
         set_color("white");
         return "off"
 
@@ -117,9 +117,10 @@ def setMode():
 #from Database
 @app.route('/settemp', methods = ['POST'])
 def settemp():
-    #r = requests.
+    r = request.form['temp']
+    newtemp = int(r.text)
     Results = Cursor.fetchall()
-    desiredtemp = Results(1);
+    desiredtemp = int(Results(1)[:-1])
 
     if (desiredtemp > calculate_avg()):
         #turn LEDS Red
@@ -134,6 +135,11 @@ def settemp():
         #idle/off
         set_color("white");
 
+    Cursor.execute("""
+    UPDATE projectDB
+    SET avg_temp=%s
+    WHERE db_index=%s
+    """, (newtemp ,0))
 
 
 
@@ -158,6 +164,7 @@ def currentStatus():
         SET status=%s
         WHERE db_index=%s
         """, (0 ,0))
+        return "Heating"
 
     if (settemp() == 1):
         Cursor.execute("""
@@ -165,6 +172,7 @@ def currentStatus():
         SET status=%s
         WHERE db_index=%s
         """, (1 ,0))
+        return "Cooling"
 
     else:
         Cursor.execute("""
@@ -172,28 +180,7 @@ def currentStatus():
         SET status=%s
         WHERE db_index=%s
         """, (2 ,0))
-
-
-
-
-var = 1
-while var == 1 :  # This constructs an infinite loop
-
-    Results = Cursor.fetchall();
-    if (Results(1) != tempResults(1)):
-        settemp();
-
-    if (Results(2) != tempResults(2)):
-        setMode();
-
-    time.sleep(5);
-    tempResults = Results;
-
-
-
-
-Con.close()
-
+        return "Idle"
 
 
 def set_led(r, g, b):
