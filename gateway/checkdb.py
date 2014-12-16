@@ -17,13 +17,18 @@ Cursor = Con.cursor()
 sql = "SELECT avg_temp, current_temp, mode, status FROM projectDB"
 Cursor.execute(sql)
 
-curMode = 0
-curTemp = 0
+curMode = -1
+curTemp = -1
 
 
 while True :  # This constructs an infinite loop
+    Con = MySQLdb.Connect(host="69.65.10.232", port=3306, user="timuster_ece4564", passwd="netApps4564", db="timuster_ece4564")
+    Cursor = Con.cursor()
 
-    ambientTemp = int(calculate_avg())
+    curTemp = int(get_avg())
+    print(curTemp)
+    sql = "SELECT avg_temp, current_temp, mode, status FROM projectDB"
+    Cursor.execute(sql)
 
     Results = Cursor.fetchall();
     if (int(Results[0][1]) != curTemp):
@@ -34,8 +39,8 @@ while True :  # This constructs an infinite loop
 
     time.sleep(5);
     #tempResults = Results;
-    curMode = int(Results[0][1])
-    curTemp = int(Results[0][2])
+    #curMode = int(Results[0][1])
+    #curTemp = int(Results[0][2])
 
 
 Con.close()
