@@ -15,7 +15,6 @@ if ($conn->connect_error) {
 if(isset($_POST['update']))
 {
    
-  
     $retval = $conn->query($sql);
     if(! $retval )
     {
@@ -34,16 +33,17 @@ if ($result->num_rows > 0)
 {
     // output data of each row
     while($row = $result->fetch_assoc()) {
-        //echo "Average Temp: " . $row["avg_temp"]. " - Current Temp: " . $row["current_temp"]. " " . $row["mode"]. "<br>";
         $avg_temp = $row["avg_temp"];
         $current_temp = $row["current_temp"];
         $mode = $row["mode"];
+        $current_mode = $row["status"];
     }
 } else 
 {
     echo "0 results";
 }
 
+// Set the text for set mode according to fetched value.
 if ($mode == 0)
 {
   $mode = "Heating";
@@ -65,6 +65,25 @@ else
   $mode = "Error";
 }
 
+// Set the text for current status according to fetched value.
+if ($current_mode == 0)
+{
+  $current_mode = "Heating";
+}
+elseif ($current_mode == 1)
+{
+  $current_mode = "Cooling";
+}
+elseif ($current_mode == 2)
+{
+  $current_mode = "Idle";
+}
+else
+{
+  $current_mode = "Error";
+}
+
+// Close connection.
 $conn->close();
 ?>
 
@@ -74,7 +93,20 @@ $conn->close();
     <title>
       TempNet - Dashboard
     </title>
-    <link href="http://fonts.googleapis.com/css?family=Lato:100,300,400,700" media="all" rel="stylesheet" type="text/css" /><link href="stylesheets/bootstrap.min.css" media="all" rel="stylesheet" type="text/css" /><link href="stylesheets/font-awesome.css" media="all" rel="stylesheet" type="text/css" /><link href="stylesheets/se7en-font.css" media="all" rel="stylesheet" type="text/css" /><link href="stylesheets/isotope.css" media="all" rel="stylesheet" type="text/css" /><link href="stylesheets/jquery.fancybox.css" media="all" rel="stylesheet" type="text/css" /><link href="stylesheets/fullcalendar.css" media="all" rel="stylesheet" type="text/css" /><link href="stylesheets/wizard.css" media="all" rel="stylesheet" type="text/css" /><link href="stylesheets/select2.css" media="all" rel="stylesheet" type="text/css" /><link href="stylesheets/morris.css" media="all" rel="stylesheet" type="text/css" /><link href="stylesheets/datatables.css" media="all" rel="stylesheet" type="text/css" /><link href="stylesheets/datepicker.css" media="all" rel="stylesheet" type="text/css" /><link href="stylesheets/timepicker.css" media="all" rel="stylesheet" type="text/css" /><link href="stylesheets/colorpicker.css" media="all" rel="stylesheet" type="text/css" /><link href="stylesheets/bootstrap-switch.css" media="all" rel="stylesheet" type="text/css" /><link href="stylesheets/daterange-picker.css" media="all" rel="stylesheet" type="text/css" /><link href="stylesheets/typeahead.css" media="all" rel="stylesheet" type="text/css" /><link href="stylesheets/summernote.css" media="all" rel="stylesheet" type="text/css" /><link href="stylesheets/pygments.css" media="all" rel="stylesheet" type="text/css" /><link href="stylesheets/style.css" media="all" rel="stylesheet" type="text/css" /><link href="stylesheets/color/green.css" media="all" rel="alternate stylesheet" title="green-theme" type="text/css" /><link href="stylesheets/color/orange.css" media="all" rel="alternate stylesheet" title="orange-theme" type="text/css" /><link href="stylesheets/color/magenta.css" media="all" rel="alternate stylesheet" title="magenta-theme" type="text/css" /><link href="stylesheets/color/gray.css" media="all" rel="alternate stylesheet" title="gray-theme" type="text/css" /><script src="../../../code.jquery.com/jquery-1.10.2.min.js" type="text/javascript"></script><script src="../../../code.jquery.com/ui/1.10.3/jquery-ui.js" type="text/javascript"></script><script src="javascripts/bootstrap.min.js" type="text/javascript"></script><script src="javascripts/raphael.min.js" type="text/javascript"></script><script src="javascripts/selectivizr-min.js" type="text/javascript"></script><script src="javascripts/jquery.mousewheel.js" type="text/javascript"></script><script src="javascripts/jquery.vmap.min.js" type="text/javascript"></script><script src="javascripts/jquery.vmap.sampledata.js" type="text/javascript"></script><script src="javascripts/jquery.vmap.world.js" type="text/javascript"></script><script src="javascripts/jquery.bootstrap.wizard.js" type="text/javascript"></script><script src="javascripts/fullcalendar.min.js" type="text/javascript"></script><script src="javascripts/gcal.js" type="text/javascript"></script><script src="javascripts/jquery.dataTables.min.js" type="text/javascript"></script><script src="javascripts/datatable-editable.js" type="text/javascript"></script><script src="javascripts/jquery.easy-pie-chart.js" type="text/javascript"></script><script src="javascripts/excanvas.min.js" type="text/javascript"></script><script src="javascripts/jquery.isotope.min.js" type="text/javascript"></script><script src="javascripts/isotope_extras.js" type="text/javascript"></script><script src="javascripts/modernizr.custom.js" type="text/javascript"></script><script src="javascripts/jquery.fancybox.pack.js" type="text/javascript"></script><script src="javascripts/select2.js" type="text/javascript"></script><script src="javascripts/styleswitcher.js" type="text/javascript"></script><script src="javascripts/wysiwyg.js" type="text/javascript"></script><script src="javascripts/summernote.min.js" type="text/javascript"></script><script src="javascripts/jquery.inputmask.min.js" type="text/javascript"></script><script src="javascripts/jquery.validate.js" type="text/javascript"></script><script src="javascripts/bootstrap-fileupload.js" type="text/javascript"></script><script src="javascripts/bootstrap-datepicker.js" type="text/javascript"></script><script src="javascripts/bootstrap-timepicker.js" type="text/javascript"></script><script src="javascripts/bootstrap-colorpicker.js" type="text/javascript"></script><script src="javascripts/bootstrap-switch.min.js" type="text/javascript"></script><script src="javascripts/typeahead.js" type="text/javascript"></script><script src="javascripts/daterange-picker.js" type="text/javascript"></script><script src="javascripts/date.js" type="text/javascript"></script><script src="javascripts/morris.min.js" type="text/javascript"></script><script src="javascripts/skycons.js" type="text/javascript"></script><script src="javascripts/fitvids.js" type="text/javascript"></script><script src="javascripts/jquery.sparkline.min.js" type="text/javascript"></script><script src="javascripts/main.js" type="text/javascript"></script><script src="javascripts/respond.js" type="text/javascript"></script>
+    
+    <link href="http://fonts.googleapis.com/css?family=Lato:100,300,400,700" media="all" rel="stylesheet" type="text/css" />
+    <link href="stylesheets/bootstrap.min.css" media="all" rel="stylesheet" type="text/css" />
+    <link href="stylesheets/font-awesome.css" media="all" rel="stylesheet" type="text/css" />
+    <link href="stylesheets/style.css" media="all" rel="stylesheet" type="text/css" />
+    
+    <script src="../../../code.jquery.com/jquery-1.10.2.min.js" type="text/javascript"></script><script src="../../../code.jquery.com/ui/1.10.3/jquery-ui.js" type="text/javascript"></script><script src="javascripts/bootstrap.min.js" type="text/javascript"></script><script src="javascripts/raphael.min.js" type="text/javascript">
+    </script>
+    <script src="javascripts/jquery.mousewheel.js" type="text/javascript"></script>
+    <script src="javascripts/jquery.bootstrap.wizard.js" type="text/javascript"></script>
+    <script src="javascripts/modernizr.custom.js" type="text/javascript"></script>
+    <script src="javascripts/main.js" type="text/javascript"></script>
+    <script src="javascripts/respond.js" type="text/javascript"></script>
+
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
   </head>
   <body>
@@ -86,10 +118,8 @@ $conn->close();
                 <div class="nav-collapse">
                   <ul class="nav">
                     
-                    
                       <a class="logo logoText" href="index.php">TempNet</a>
                     
-                   
                   </ul>
                 </div>
               </div>
@@ -102,7 +132,6 @@ $conn->close();
             <div class="widget-container stats-container">
               <div class="col-md-3">
                 <div class="number">
-                  <!--<div class="icon globe"></div>-->
                   <?php echo $avg_temp; ?> <small>&deg;</small>
                 </div>
                 <div class="text">
@@ -111,7 +140,6 @@ $conn->close();
               </div>
               <div class="col-md-3">
                 <div class="number">
-                  <!--<div class="icon visitors"></div>-->
                   <?php echo $current_temp; ?> <small>&deg;</small>
                 </div>
                 <div class="text">
@@ -120,17 +148,15 @@ $conn->close();
               </div>
               <div class="col-md-3">
                 <div class="number">
-                  <!--<div class="icon chat-bubbles"></div>-->
                   <?php echo $mode?>
                 </div>
                 <div class="text">
-                  Current State
+                  Set Mode
                 </div>
               </div>
               <div class="col-md-3">
                 <div class="number">
-                  <!--<div class="icon money"></div>-->
-                  OK 
+                  <?php echo $current_mode?>
                 </div>
                 <div class="text">
                   System status
@@ -142,7 +168,7 @@ $conn->close();
         <!-- End Main Stats -->
         <div class="row">
           <!-- Form -->
-          <div class="col-md-8">
+          <div class="col-md-12">
             <div class="row">
               <div class="col-lg-12">
                 <div class="widget-container fluid-height clearfix">
@@ -153,7 +179,7 @@ $conn->close();
                     <form method="post" action="form_submit.php" class="form-horizontal" onsubmit="reloadPage()">
                 
                       <div class="form-group">
-                        <label class="control-label col-md-2">Set temperature</label>
+                        <label class="control-label col-md-2">Set temperature (F)&deg</label>
                         <div class="col-md-7">
                           <input name = "set_temp" id = "set_temp" class="form-control" placeholder="" type="text">
                         </div>
@@ -167,13 +193,12 @@ $conn->close();
 
                           <label class="radio-inline"><input name="mode" id="mode"  type="radio" value="cooling"><span>Cooling</span></label>
 
-                          <label class="radio-inline"><input name="mode" id="mode"  type="radio" value="default"><span>Default</span></label>
+                          <label class="radio-inline"><input name="mode" id="mode"  type="radio" value="default" checked="checked"><span>Default</span></label>
                           
                           <label class="radio-inline"><input name="mode" id="mode"  type="radio" value="off"><span>Off</span></label>
                           
                         </div>
                       </div>
-
                       
                       <div class="form-group">
                         
@@ -192,28 +217,7 @@ $conn->close();
             </div>
           </div>
           <!-- end Form-->
-          <div class="col-md-4">
-            
-          <!-- System Stats -->
-            <div class="widget-container small">
-              <div class="heading">
-                <i class="icon-signal"></i>System stats<i class="icon-list pull-right"></i><i class="icon-refresh pull-right"></i>
-              </div>
-              <div class="widget-content padded">
-                <div class="bar-chart-widget">
-                  <div class="chart-graph">
-                    <div id="barcharts">
-                      Loading...
-                    </div>
-                   
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- End System Stats -->
-        </div>
-        
+          
       </div>
     </div>
   </body>
