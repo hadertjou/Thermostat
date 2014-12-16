@@ -1,38 +1,46 @@
 #!/usr/bin/env python2
 
+"""
+A simple script to test the registration process.
+Must be run as root for now.
+"""
+
 from flask import Flask, request
 import MySQLdb
 import time
 import RPi.GPIO as GPIO
 
-"""
-A simple script to test the registration process.
-Must be run as root for now.
-"""
+# Hack to import led.py
+import sys
+sys.path.insert(0, '/srv/common')
+from led import *
 
 app = Flask(__name__)
 
 
 desiredtemp = 0;
 state = 0;
+
+# TODO why are you hardcoding these? - mhazinsk
 remote1 = 0;
 remote2 = 0;
 remote3 = 0;
 nodes = {'remote1': 0, 'remote2': 0, 'remote3': 0}
 
-
-GPIO.setmode(GPIO.BOARD)
-GPIO.setup(19, GPIO.OUT)
-GPIO.setup(21, GPIO.OUT)
-GPIO.setup(23, GPIO.OUT)
-
+setup_led()
 
 # Create a connection object and create a cursor
-Con = MySQLdb.Connect(host="127.0.0.1", port=3306, user="dac_user", passwd="myPassword", db="tst")
+#Con = MySQLdb.Connect(host="127.0.0.1", port=3306, user="dac_user", passwd="myPassword", db="tst")
+Con = MySQLdb.Connect(host="69.65.10.232",
+        port=3306,
+        user="timuster_ece4564",
+        passwd="netApps4564",
+        db="timuster_ece4564")
+
 Cursor = Con.cursor()
 
 # Make SQL string and execute it
-sql = "SELECT * FROM Users"
+sql = "SELECT * FROM projectDB"
 Cursor.execute(sql)
 
 # Fetch all results from the cursor into a sequence and close the connection
@@ -195,37 +203,5 @@ while var == 1 :  # This constructs an infinite loop
 Con.close()
 
 
-
-def set_led(r, g, b):
-    """Set the color of the LED"""
-    GPIO.output(19, r)
-    GPIO.output(21, g)
-    GPIO.output(23, b)
-
-def set_color(color):
-    """Receives name of color and sets the LED"""
-    if color == 'red':
-        set_led(0, 1, 1)
-    elif color == 'green':
-        set_led(1, 0, 1)
-    elif color == 'blue':
-        set_led(1, 1, 0)
-    elif color == 'yellow':
-        set_led(0, 0, 1)
-    elif color == 'magenta':
-        set_led(0, 1, 0)
-    elif color == 'cyan':
-        set_led(1, 0, 0)
-    elif color == 'white':
-        set_led(0, 0, 0)
-
-
-
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80, debug=False)
-
-
-
-
-
-
+    app.run(host='0.0.0.0', port=80, debug=True) #yolo
