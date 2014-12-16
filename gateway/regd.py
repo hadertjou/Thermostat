@@ -18,13 +18,13 @@ from led import *
 app = Flask(__name__)
 
 
-desiredtemp = 0;
-state = 0;
+desiredtemp = 0
+state = 0
 
 # TODO why are you hardcoding these? - mhazinsk
-remote1 = 0;
-remote2 = 0;
-remote3 = 0;
+remote1 = 0
+remote2 = 0
+remote3 = 0
 nodes = {'remote1': 0, 'remote2': 0, 'remote3': 0}
 
 setup_led()
@@ -56,8 +56,8 @@ def reg_client():
     #while (iter(nodes)):
     #    ip = request.remote_addr;
     for x in range (0, len(nodes)):
-        ip = request.remote_addr;
-        nodes[x] = ip;
+        ip = request.remote_addr
+        nodes[x] = ip
     print(retstr)
     return retstr
 
@@ -65,12 +65,12 @@ def reg_client():
 
 @app.route('/temp', methods = ['GET'])
 def calculate_avg():
-    temp = 0;
+    temp = 0
     for x in range (0, len(nodes)):
-        r = request.get("http://" + str(nodes[x]) + "/temp");
-        temp += int(r.text);
+        r = request.get("http://" + str(nodes[x]) + "/temp")
+        temp += int(r.text)
 
-    avg = temp;
+    avg = temp
 
     Cursor.execute("""
     UPDATE projectDB
@@ -78,7 +78,7 @@ def calculate_avg():
     WHERE db_index=%s
     """, (avg,0))
 
-    return avg;
+    return avg
 
 
 
@@ -86,33 +86,33 @@ def calculate_avg():
 @app.route('/status', methods = ['GET'])
 def setMode():
 
-    Results = Cursor.fetchall();
+    Results = Cursor.fetchall()
     #(avgtemp, settemp, mode, status)
     if (Results(2) == 0):
-        set_color("red");
+        set_color("red")
         return "heating"
     if (Results(2) == 1):
-        set_color("blue");
+        set_color("blue")
         return "cooling"
     if (Results(2) == 2):
 
         
         if (desiredtemp > calculate_avg()):
             #turn LEDS Red
-            set_color("red");
-            return 0;
+            set_color("red")
+            return 0
         if (desiredtemp < calculate_avg()):
             #turn LEDs Blue
-            set_color("blue");
-            return 1;
+            set_color("blue")
+            return 1
 
         if (desiredtemp == calculate_avg()):
             #idle/off
-            set_color("white");
+            set_color("white")
 
         return "default"
     if (Results(2) == 3):
-        set_color("white");
+        set_color("white")
         return "off"
 
     return "error"
@@ -127,20 +127,20 @@ def setMode():
 def settemp():
     #r = requests.
     Results = Cursor.fetchall()
-    desiredtemp = Results(1);
+    desiredtemp = Results(1)
 
     if (desiredtemp > calculate_avg()):
         #turn LEDS Red
-        set_color("red");
-        return 0;
+        set_color("red")
+        return 0
     if (desiredtemp < calculate_avg()):
         #turn LEDs Blue
-        set_color("blue");
-        return 1;
+        set_color("blue")
+        return 1
 
     if (desiredtemp == calculate_avg()):
         #idle/off
-        set_color("white");
+        set_color("white")
 
 
 
@@ -184,18 +184,18 @@ def currentStatus():
 
 
 
-var = 1
-while var == 1 :  # This constructs an infinite loop
+while True :  
 
-    Results = Cursor.fetchall();
-    if (Results(1) != tempResults(1)):
-        settemp();
+    Results = Cursor.fetchall()
+    # TODO Fix this.
+    #if (Results(1) != tempResults(1)):
+    #    settemp()
 
-    if (Results(2) != tempResults(2)):
-        setMode();
+    #if (Results(2) != tempResults(2)):
+    #    setMode()
 
-    time.sleep(5);
-    tempResults = Results;
+    time.sleep(5)
+    tempResults = Results
 
 
 
