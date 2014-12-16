@@ -1,0 +1,28 @@
+auto lo
+
+iface lo inet loopback
+#iface eth0 inet dhcp
+auto eth0
+iface eth0 inet static
+    address 192.168.0.7   # Your assigned IP goes here
+    netmask 255.255.0.0
+    gateway 192.168.0.6   # Matt's laptop is acting as a router
+
+# If you don't have wifi configured, comment out the next 3 lines
+allow-hotplug wlan0
+iface wlan0 inet manual
+wpa-roam /etc/wpa_supplicant/wpa_supplicant.conf
+iface default inet dhcp
+
+### IP ASSIGNMENTS ###
+# These are done by the number corresponding to the breadboard attached to your Pi
+# Michael (remote)  192.168.0.1
+# Matt (gateway)    192.168.0.2
+# Brian (remote)    192.168.0.3
+# Sumit (remote)    192.168.0.4
+
+# Additionally:
+# Matt's laptop     192.168.0.6   (serving as a router)
+
+### INSTALLATION INSTRUCTIONS ###
+# To install, copy this file to /etc/network/interfaces and then run /etc/init.d/networking restart
